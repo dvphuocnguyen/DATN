@@ -1,0 +1,16 @@
+export { default as authAPI } from "./auth";
+export { default as hotelAPI } from "./hotel";
+export { default as floorAPI } from "./floor";
+export { default as deviceAPI } from "./device";
+export { default as roomTypeAPI } from "./roomType";
+export { default as statusAPI } from "./status";
+export { default as roomAPI } from "./room";
+export { default as vnPayAPI } from "./vnPay";
+export { default as billAPI } from "./bill";
+export { default as userAPI } from "./user";
+export { default as areaAPI } from "./area";
+export { default as uploadAPI } from "./upload";
+export { default as placeAPI } from "./place";
+export { default as tripAPI } from "./trip";
+export { default as bookingTripAPI } from "./bookingTrip";
+export * from "./provice";
