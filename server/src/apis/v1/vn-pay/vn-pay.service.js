@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import dateFormat from "dateformat";
+// import dateFormat from "dateformat";
 import queryString from "qs";
 import SQLString from "sqlstring";
 import config from "../../../config/index.js";
@@ -9,21 +9,35 @@ import APIError from "../../../utils/api-error.util.js";
 import { sortObject } from "../../../utils/functions.js";
 import billService from "../bills/bill.service.js";
 import transactionService from "../transactions/transaction.service.js";
+import timezone from 'moment-timezone';
 
-// https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-// ?vnp_Amount=594444400
-// &vnp_Command=pay
-// &vnp_CreateDate=20240607230636
-// &vnp_CurrCode=VND
-// &vnp_IpAddr=%3A%3A1
-// &vnp_Locale=vn
-// &vnp_OrderInfo=Thanh+to%C3%A1n+%C4%91%E1%BA%B7t+l%E1%BB%8Bch+tr%C3%ACnh+chuy%E1%BA%BFn+%C4%91i.+M%C3%A3+giao+d%E1%BB%8Bch%3A+20240607234736
-// &vnp_OrderType=other
-// &vnp_ReturnUrl=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fv1%2Fvn-pay%2Freturn
-// &vnp_TmnCode=AHD4S5OK
-// &vnp_TxnRef=20240607234736
-// &vnp_Version=2.1.0
-// &vnp_SecureHash=8201ab4d45c746ff94af04360bbc0c031a092ab5c917b2058c5b7e0020b2faf77567876bb652a83eeb0bcae330a4ee8a6db26cd9d4eea13c434a0f0f12be0818
+/**
+ * Định dạng lại ngày theo định dạng của VNPay, mặc định là yyyyMMddHHmmss
+ * @en Format date to VNPay format, default is yyyyMMddHHmmss
+ *
+ * @param date date to format
+ * @param format format of date
+ * @returns formatted date
+ */
+export function dateFormat(date, format = 'yyyyMMddHHmmss') {
+  const pad = (n) => (n < 10 ? `0${n}` : n).toString();
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hour = pad(date.getHours());
+  const minute = pad(date.getMinutes());
+  const second = pad(date.getSeconds());
+
+  return Number(
+      format
+          .replace('yyyy', year.toString())
+          .replace('MM', month)
+          .replace('dd', day)
+          .replace('HH', hour)
+          .replace('mm', minute)
+          .replace('ss', second),
+  );
+}
 
 class VNPayService {
   static handleCreatePaymentUrl = async ({
@@ -31,11 +45,12 @@ class VNPayService {
     amount,
     bankCode,
     orderId,
-    message = "Thanh toan dat phong khach san: Ma giao dich",
+    message = "Thanh toan dat phong khach san: Mã giao dich",
   }) => {
     try {
       const date = new Date();
-      const createDate = dateFormat(date, "yyyymmddHHmmss");
+      const timeGMT7 = timezone(date).tz('Asia/Ho_Chi_Minh').format();
+      const createDate = dateFormat(new Date(timeGMT7), 'yyyyMMddHHmmss');
 
       const location = config.location; // vn
       const currCode = config.vnp.currCode; // VND
@@ -61,7 +76,8 @@ class VNPayService {
       vnpParams["vnp_OrderType"] = "other";
       vnpParams["vnp_ReturnUrl"] = returnUrl;
       vnpParams["vnp_TxnRef"] = orderId;
-      vnpParams["vnp_ExpireDate"] = +createDate + 60 * 20;
+      vnpParams["vnp_ExpireDate"] = createDate + 60 * 20;
+      // vnpParams["vnp_SecureHashType"] = 'sha512';
 
       if (bankCode !== null && bankCode !== "") {
         vnpParams["vnp_BankCode"] = bankCode;

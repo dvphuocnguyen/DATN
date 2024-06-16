@@ -29,6 +29,32 @@ function* fetchCreate({ payload }) {
 function* watchFetchCreate() {
   yield takeLatest(reviewActions.createStart.type, fetchCreate);
 }
+
+// * Delete
+function* fetchDelete({ payload }) {
+  try {
+    const response = yield call(tripAPI.deleteReview, payload.id);
+
+    if (response) {
+      yield put(reviewActions.deleteSucceed());
+      yield put(appActions.setOpenOverlay(false));
+      yield put(
+        reviewActions.getAllStart({ where: "trip_id," + payload.trip_id, order: "created_at,desc" })
+      );
+    }
+  } catch (error) {
+    yield put(appActions.setOpenOverlay(false));
+    if (error.response) {
+      yield put(reviewActions.failed(error.response.data.message));
+    } else {
+      yield put(reviewActions.failed(error.message));
+    }
+  }
+}
+
+function* watchFetchDelete() {
+  yield takeLatest(reviewActions.deleteStart.type, fetchDelete);
+}
 // * getAll
 function* fetchGetAll({ payload }) {
   try {
@@ -93,6 +119,7 @@ function* reviewSaga() {
     watchFetchCreate(),
     watchFetchUpdate(),
     watchSetFilterWithDebounce(),
+    watchFetchDelete()
   ]);
 }
 

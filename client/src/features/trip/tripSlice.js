@@ -45,6 +45,8 @@ const tripSlice = createSlice({
       state.isLoading = true;
     },
     getAllSucceed: (state, { payload }) => {
+
+     
       state.isLoading = false;
       state.data = payload.result;
       state.paginations = {

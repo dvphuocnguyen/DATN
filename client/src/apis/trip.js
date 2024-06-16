@@ -35,6 +35,9 @@ const placeAPI = {
   getReview: (params) => {
     return instance.get(`${host}/review`, { params });
   },
+  deleteReview: (id) => {
+    return instance.delete(`${host}/review/${id}`);
+  },
 };
 
 export default placeAPI;

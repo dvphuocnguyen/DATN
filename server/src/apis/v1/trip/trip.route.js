@@ -6,6 +6,7 @@ const router = Router();
 router.post("/review", tripController.addReview);
 router.get("/review", tripController.getAllReview);
 router.patch("/review/:id", tripController.toggleReview);
+router.delete("/review/:id", tripController.deleteReview);
 
 router.get("/", tripController.getAll);
 router.post("/user/new", tripController.createByUser);

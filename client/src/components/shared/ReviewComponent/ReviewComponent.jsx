@@ -1,7 +1,16 @@
-import { Avatar, Box, Button, Rating, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  Rating,
+  Stack,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import account from "~/_mock/account";
 import { fToNow } from "~/utils/formatTime";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const ReviewComponent = ({
   id = 0,
@@ -11,7 +20,9 @@ const ReviewComponent = ({
   createdAt = new Date(),
   isAdmin = false,
   isActive = true,
+  isShowDelete = false,
   onToggleIsActive = (id, isActive) => {},
+  onDelete = (id) => {},
 }) => {
   return (
     <Stack
@@ -31,12 +42,22 @@ const ReviewComponent = ({
         <Avatar sx={{ width: 56, height: 56 }} src={account.photoURL} />
       </Box>
 
-      <Box>
-        <Stack flexDirection={"row"} alignItems={"center"} gap={2}>
+      <Box flex={2}>
+        <Stack
+          flexDirection={"row"}
+          alignItems={"center"}
+          gap={2}
+          justifyContent={"space-between"}
+          width={"100%"}
+        >
           <Typography variant="subtitle2" fontWeight={700}>
             {`${email} `}
 
-            <Typography component={"span"} fontSize={12} color={({ palette }) => palette.grey[700]}>
+            <Typography
+              component={"span"}
+              fontSize={12}
+              color={({ palette }) => palette.grey[700]}
+            >
               {fToNow(createdAt)}
             </Typography>
           </Typography>
@@ -52,11 +73,22 @@ const ReviewComponent = ({
               {isActive ? "Ẩn" : "Hiện"}
             </Button>
           ) : null}
+
+          {isShowDelete ? (
+            <IconButton onClick={() => onDelete?.(id)} color="error">
+              <DeleteIcon />
+            </IconButton>
+          ) : null}
         </Stack>
 
         <Box>
           <Typography variant="subtitle2">
-            <Rating name="simple-controlled" value={score} precision={0.5} readOnly />
+            <Rating
+              name="simple-controlled"
+              value={score}
+              precision={0.5}
+              readOnly
+            />
           </Typography>
           <Typography variant="subtitle2">{comment}</Typography>
         </Box>

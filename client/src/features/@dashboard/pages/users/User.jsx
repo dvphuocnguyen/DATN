@@ -11,7 +11,7 @@ function Floor(props) {
   const dispatch = useDispatch();
 
   const dataHead = [
-    "Ma Người dùng",
+    "Mã Người dùng",
     "Họ và tên",
     "E-mail",
     "Số điện thoại",

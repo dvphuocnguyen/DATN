@@ -31,6 +31,7 @@ import FormAddReview from "~/components/shared/FormAddReview";
 import ReviewComponent from "~/components/shared/ReviewComponent";
 import SliderComponent from "~/components/shared/SliderComponent";
 import { APPLICATION_NAME } from "~/constants";
+import DialogConfirm from "~/features/@dashboard/components/DialogConfim";
 import { appActions } from "~/features/app/appSlice";
 import { authState } from "~/features/authentication/authSlice";
 import { bookingTripActions } from "~/features/bookingTrip/bookingTripSlice";
@@ -75,6 +76,7 @@ const TripDetails = () => {
   const { user } = useSelector(authState);
   const [openReview, setOpenReview] = useState(false);
   const { data: reviews } = useReviewSlice();
+  const [selectedIdDelete, setSelectedIdDelete] = useState(null);
 
   useLayoutEffect(() => {
     if (!id) {
@@ -87,7 +89,12 @@ const TripDetails = () => {
         dispatch(appActions.setOpenOverlay(true));
 
         const response = await tripAPI.getById(id);
-        dispatch(reviewActions.getAllStart({ where: "trip_id," + id, order: "created_at,desc" }));
+        dispatch(
+          reviewActions.getAllStart({
+            where: "trip_id," + id,
+            order: "created_at,desc",
+          })
+        );
 
         await sleep();
 
@@ -138,7 +145,9 @@ const TripDetails = () => {
     const newStartDate = selection.startDate;
     const newEndDate = addDays(newStartDate, details?.total_day - 1);
 
-    setDate([{ key: "selection", startDate: newStartDate, endDate: newEndDate }]);
+    setDate([
+      { key: "selection", startDate: newStartDate, endDate: newEndDate },
+    ]);
 
     setOpenDate(false);
   };
@@ -167,24 +176,55 @@ const TripDetails = () => {
   };
 
   const handleSubmitReview = (values) => {
-
     if (!user?.user_id) {
       navigate("/sign-in", { replace: true });
       return;
     }
 
-    const payload = { ...values, user_id: user.user_id, trip_id: details.id }
+    const payload = { ...values, user_id: user.user_id, trip_id: details.id };
 
     dispatch(reviewActions.createStart(payload));
     handleCloseReview();
+  };
+
+  const handleOnDelete = (id) => {
+    setSelectedIdDelete(id);
+  };
+
+  const handleCloseDelete = () => {
+    setSelectedIdDelete(null);
+  };
+
+  const handleConfirmDelete = (values) => {
+    const payload = {
+      id: values,
+      trip_id: details.id,
+    };
+    dispatch(reviewActions.deleteStart(payload));
+    handleCloseDelete();
   };
 
   return (
     <Page title="Chi tiết chuyến đi">
       <NavBar />
 
+      {Boolean(selectedIdDelete) ? (
+        <DialogConfirm
+          data={selectedIdDelete}
+          onClose={handleCloseDelete}
+          onConfirm={handleConfirmDelete}
+          open
+          title="Xác nhận trước khi xóa đánh giá"
+          name="đánh giá này"
+        />
+      ) : null}
+
       {openReview ? (
-        <FormAddReview open={true} onSubmit={handleSubmitReview} onClose={handleCloseReview} />
+        <FormAddReview
+          open={true}
+          onSubmit={handleSubmitReview}
+          onClose={handleCloseReview}
+        />
       ) : null}
 
       {openBooking && !_.isEmpty(user) ? (
@@ -237,12 +277,16 @@ const TripDetails = () => {
                     justifyContent={"space-between"}
                   >
                     <Stack>
-                      <Typography mb={2} sx={{ fontWeight: "bold", fontSize: 20 }}>
+                      <Typography
+                        mb={2}
+                        sx={{ fontWeight: "bold", fontSize: 20 }}
+                      >
                         {details.name}
                       </Typography>
                       <Typography sx={{ fontSize: 16 }}>
-                        Ngày tạo: <b>{` ${formatDateVN(details.created_at, "P")}`}</b>, 1 người |
-                        Tạo bởi <b>{APPLICATION_NAME}</b>
+                        Ngày tạo:{" "}
+                        <b>{` ${formatDateVN(details.created_at, "P")}`}</b>, 1
+                        người | Tạo bởi <b>{APPLICATION_NAME}</b>
                       </Typography>
                     </Stack>
                     <Stack flexDirection={"row"}>
@@ -259,7 +303,10 @@ const TripDetails = () => {
                     Giới thiệu
                   </Typography>
 
-                  <Typography mt={2} sx={{ fontSize: 14, textAlign: "justify" }}>
+                  <Typography
+                    mt={2}
+                    sx={{ fontSize: 14, textAlign: "justify" }}
+                  >
                     {details.description}
                   </Typography>
 
@@ -272,11 +319,18 @@ const TripDetails = () => {
                       <Box key={index}>
                         <Typography
                           mt={0.5}
-                          sx={{ fontSize: 14, fontWeight: 700, textAlign: "justify" }}
+                          sx={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            textAlign: "justify",
+                          }}
                         >
                           {item.name}
                         </Typography>
-                        <Typography mt={0.5} sx={{ fontSize: 14, textAlign: "justify" }}>
+                        <Typography
+                          mt={0.5}
+                          sx={{ fontSize: 14, textAlign: "justify" }}
+                        >
                           - {item.description}
                         </Typography>
                         {item.places?.map((place, idx) => {
@@ -286,7 +340,8 @@ const TripDetails = () => {
                               mt={0.5}
                               sx={{ pl: 2, fontSize: 14, textAlign: "justify" }}
                             >
-                              + {`${place?.place?.name} (${place?.place?.description})`}
+                              +{" "}
+                              {`${place?.place?.name} (${place?.place?.description})`}
                             </Typography>
                           );
                         })}
@@ -387,7 +442,11 @@ const TripDetails = () => {
             </Grid>
 
             <Grid item xs={12} md={12}>
-              <Stack flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
+              <Stack
+                flexDirection={"row"}
+                alignItems={"center"}
+                justifyContent={"space-between"}
+              >
                 <Typography variant="h4">Đánh giá của khách hàng</Typography>
                 <Button variant="contained" onClick={handleOpenReview}>
                   Đánh giá
@@ -400,6 +459,9 @@ const TripDetails = () => {
                 reviews.map((row, index) =>
                   row.is_active ? (
                     <ReviewComponent
+                      id={row.id}
+                      isShowDelete={row.user?.user_id === user?.user_id}
+                      onDelete={handleOnDelete}
                       key={index}
                       email={`${row?.user?.last_name} ${row?.user?.first_name}`}
                       comment={row.comment}
@@ -409,7 +471,9 @@ const TripDetails = () => {
                   ) : null
                 )
               ) : (
-                <Typography variant="body2">Chưa có đánh giá của khách hàng</Typography>
+                <Typography variant="body2">
+                  Chưa có đánh giá của khách hàng
+                </Typography>
               )}
             </Grid>
           </Grid>

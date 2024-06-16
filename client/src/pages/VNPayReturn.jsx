@@ -5,15 +5,10 @@ import {
   Container,
   Paper,
   Stack,
-  Tooltip,
-  Typography,
+  Typography
 } from "@mui/material";
-import { format } from "date-fns";
-import Page from "~/components/Page";
-import TextTrucate from "~/components/TextTrucate";
-import vi from "date-fns/locale/vi";
-import { fPrice } from "~/utils/formatNumber";
 import { Link } from "react-router-dom";
+import Page from "~/components/Page";
 
 function VNPayReturn(props) {
   return (
@@ -55,10 +50,10 @@ function VNPayReturn(props) {
                   sx={{ width: 100, color: "#19c790", height: 100 }}
                 />
                 <Typography mt={2} variant="h3">
-                  Đặt phòng thành công
+                  Đặt thành công
                 </Typography>
 
-                <Typography mt={2}>Chúc bạn có một kì nghỉ vui vẻ</Typography>
+                <Typography mt={2}>Chúc bạn có một trải nghiệm thú vị</Typography>
               </Stack>
 
               <Stack justifyContent="center" mt={2} alignItems="center" mb={2}>

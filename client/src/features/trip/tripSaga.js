@@ -28,10 +28,6 @@ function* watchFetchCreate() {
   yield takeLatest(tripActions.createStart.type, fetchCreate);
 }
 
-function* watchFetchGetReviewByTrip() {
-  yield takeLatest(tripActions.getReviewStart.type, fetchGetReviewByTrip);
-}
-
 // * getAll
 function* fetchGetAll({ payload }) {
   try {

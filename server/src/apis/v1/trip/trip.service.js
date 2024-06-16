@@ -14,7 +14,8 @@ class TripService extends DBModel {
   primaryKey = "id";
 
   async createByUser(data) {
-    const { user_id, destination_id, start, start_date, end_date, totalDay } = data;
+    const { user_id, destination_id, start, start_date, end_date, totalDay } =
+      data;
 
     const [area, { result: places }] = await Promise.all([
       areaService.getById(destination_id),
@@ -69,7 +70,9 @@ class TripService extends DBModel {
 
     const newTripDetails = [];
     let flatIndex = 2; // Same element position 3 in places
-    let flatPlaceUsedAdded = [...places.filter((_, index) => index <= flatIndex)];
+    let flatPlaceUsedAdded = [
+      ...places.filter((_, index) => index <= flatIndex),
+    ];
 
     for (let index = 0; index < totalDay; index++) {
       const newPlaces = flatPlaceUsedAdded.map((item, idx) => {
@@ -166,7 +169,13 @@ class TripService extends DBModel {
       await this.insert({ data: newTrip, table: this.table });
 
       const newTripDetails = trip_details.map((t) => {
-        return [t.name, t.order_day, tripId, JSON.stringify(t.places), t.description];
+        return [
+          t.name,
+          t.order_day,
+          tripId,
+          JSON.stringify(t.places),
+          t.description,
+        ];
       });
 
       await this.insertBulk({
@@ -236,19 +245,37 @@ class TripService extends DBModel {
 
       const trip_details_ids = trip_details.map((t) => t?.id);
       const _tripDetailsIds = tripDetails.map((t) => t?.id);
-      const deleteTrips = tripDetails?.filter((t) => !trip_details_ids?.includes(t?.id));
-      const createTrips = trip_details.filter((t) => !_tripDetailsIds.includes(t.id));
-      const updateTrips = trip_details.filter((t) => _tripDetailsIds.includes(t.id));
+      const deleteTrips = tripDetails?.filter(
+        (t) => !trip_details_ids?.includes(t?.id)
+      );
+      const createTrips = trip_details.filter(
+        (t) => !_tripDetailsIds.includes(t.id)
+      );
+      const updateTrips = trip_details.filter((t) =>
+        _tripDetailsIds.includes(t.id)
+      );
 
       if (createTrips?.length) {
         const newTripDetails = createTrips.map((t) => {
-          return [t.name, t.order_day, id, JSON.stringify(t.places), t.description];
+          return [
+            t.name,
+            t.order_day,
+            id,
+            JSON.stringify(t.places),
+            t.description,
+          ];
         });
 
         await this.insertBulk({
           table: "trip_details",
           data: newTripDetails,
-          insertFields: ["name", "order_day", "trip_id", "places", "description"],
+          insertFields: [
+            "name",
+            "order_day",
+            "trip_id",
+            "places",
+            "description",
+          ],
         });
       }
 
@@ -316,11 +343,18 @@ class TripService extends DBModel {
       const dependencyTotalRow = [this.table];
 
       // Query select rows
-      let query = SqlString.format(`SELECT * FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'} LIMIT ? OFFSET ?`, dependencyLimitOffset);
+      let query = SqlString.format(
+        `SELECT * FROM ?? WHERE user_id ${
+          isUserNull ? "is null" : "is not null"
+        } LIMIT ? OFFSET ?`,
+        dependencyLimitOffset
+      );
 
       // Query get total rows
       let queryTotalRow = SqlString.format(
-        `SELECT count(*) as totalRow FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'}`,
+        `SELECT count(*) as totalRow FROM ?? WHERE user_id ${
+          isUserNull ? "is null" : "is not null"
+        }`,
         dependencyTotalRow
       );
 
@@ -328,33 +362,50 @@ class TripService extends DBModel {
         // Dependency query search;
         const dependencySearch = [this.table, `%${search}%`, limit, offset];
         query = SqlString.format(
-          `SELECT * FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'}  and name LIKE ? LIMIT ? OFFSET ? `,
+          `SELECT * FROM ?? WHERE user_id ${
+            isUserNull ? "is null" : "is not null"
+          }  and name LIKE ? LIMIT ? OFFSET ? `,
           dependencySearch
         );
       } else if (order && !search) {
         const dependencyOrder = [this.table, limit, offset];
         const orderBy = order.split(",").join(" ");
         query = SqlString.format(
-          `SELECT * FROM  ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+          `SELECT * FROM  ?? WHERE user_id ${
+            isUserNull ? "is null" : "is not null"
+          } ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
           dependencyOrder
         );
       } else if (search && order) {
         // Dependency query search and order;
-        const dependencySearchOrder = [this.table, `%${search}%`, limit, offset];
+        const dependencySearchOrder = [
+          this.table,
+          `%${search}%`,
+          limit,
+          offset,
+        ];
         const orderBy = order.split(",").join(" ");
         query = SqlString.format(
-          `SELECT * FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'} and name LIKE ? ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
+          `SELECT * FROM ?? WHERE user_id ${
+            isUserNull ? "is null" : "is not null"
+          } and name LIKE ? ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
           dependencySearchOrder
         );
       } else if (!_.isEmpty(whereBy)) {
         if (whereBy.value === "null") {
-          query = SqlString.format(`SELECT * FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'} and ?? IS NULL`, [this.table, whereBy.key]);
+          query = SqlString.format(
+            `SELECT * FROM ?? WHERE user_id ${
+              isUserNull ? "is null" : "is not null"
+            } and ?? IS NULL`,
+            [this.table, whereBy.key]
+          );
         } else {
-          query = SqlString.format(`SELECT * FROM ?? WHERE user_id ${isUserNull ? 'is null' : 'is not null'} and ?? LIKE ? `, [
-            this.table,
-            whereBy.key,
-            `%${whereBy.value}%`,
-          ]);
+          query = SqlString.format(
+            `SELECT * FROM ?? WHERE user_id ${
+              isUserNull ? "is null" : "is not null"
+            } and ?? LIKE ? `,
+            [this.table, whereBy.key, `%${whereBy.value}%`]
+          );
         }
       }
 
@@ -369,7 +420,9 @@ class TripService extends DBModel {
             (row) =>
               new Promise(async (resolve, reject) => {
                 try {
-                  const destination = await areaService.getById(row.destination_id);
+                  const destination = await areaService.getById(
+                    row.destination_id
+                  );
 
                   let hotel = null;
 
@@ -394,7 +447,9 @@ class TripService extends DBModel {
                     destination,
                     hotel,
                     user,
-                    cost_details: row.cost_details ? JSON.parse(row.cost_details) : null,
+                    cost_details: row.cost_details
+                      ? JSON.parse(row.cost_details)
+                      : null,
                   });
                 } catch (error) {
                   reject(error);
@@ -439,7 +494,10 @@ class TripService extends DBModel {
       });
 
       if (tripDetails.length) {
-        tripDetails = tripDetails.map((t) => ({ ...t, places: JSON.parse(t.places) }));
+        tripDetails = tripDetails.map((t) => ({
+          ...t,
+          places: JSON.parse(t.places),
+        }));
       }
 
       let hotel = null;
@@ -469,7 +527,9 @@ class TripService extends DBModel {
         hotel,
         user,
         metadata: response.metadata ? JSON.parse(response.metadata) : null,
-        cost_details: response.cost_details ? JSON.parse(response.cost_details) : null,
+        cost_details: response.cost_details
+          ? JSON.parse(response.cost_details)
+          : null,
       };
     } catch (error) {
       console.log(`[TripService -- error getById]:::`, error);
@@ -517,6 +577,16 @@ class TripService extends DBModel {
     }
   }
 
+  async deleteReview(id) {
+    try {
+      await this.delete({ table: "reviews_trips", id, idField: "id" });
+      return true;
+    } catch (error) {
+      console.log(`[TripService -- error deleteReview]:::`, error);
+      return Promise.reject(error);
+    }
+  }
+
   async toggleReview(id, data) {
     try {
       const { is_active } = data;
@@ -557,7 +627,10 @@ class TripService extends DBModel {
       const dependencyTotalRow = ["reviews_trips"];
 
       // Query select rows
-      let query = SqlString.format("SELECT * FROM ?? LIMIT ? OFFSET ?", dependencyLimitOffset);
+      let query = SqlString.format(
+        "SELECT * FROM ?? LIMIT ? OFFSET ?",
+        dependencyLimitOffset
+      );
 
       // Query get total rows
       let queryTotalRow = SqlString.format(
@@ -567,13 +640,24 @@ class TripService extends DBModel {
 
       if (search && !order) {
         // Dependency query search;
-        const dependencySearch = ["reviews_trips", `%${search}%`, limit, offset];
+        const dependencySearch = [
+          "reviews_trips",
+          `%${search}%`,
+          limit,
+          offset,
+        ];
         query = SqlString.format(
           "SELECT * FROM ?? WHERE name LIKE ? LIMIT ? OFFSET ? ",
           dependencySearch
         );
       } else if (order && !_.isEmpty(whereBy) && !search) {
-        const dependencyOrder = ["reviews_trips", whereBy.key, `%${whereBy.value}%`, limit, offset];
+        const dependencyOrder = [
+          "reviews_trips",
+          whereBy.key,
+          `%${whereBy.value}%`,
+          limit,
+          offset,
+        ];
         const orderBy = order.split(",").join(" ");
         query = SqlString.format(
           `SELECT * FROM ??  WHERE ?? LIKE ? ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
@@ -581,7 +665,12 @@ class TripService extends DBModel {
         );
       } else if (search && order) {
         // Dependency query search and order;
-        const dependencySearchOrder = ["reviews_trips", `%${search}%`, limit, offset];
+        const dependencySearchOrder = [
+          "reviews_trips",
+          `%${search}%`,
+          limit,
+          offset,
+        ];
         const orderBy = order.split(",").join(" ");
         query = SqlString.format(
           `SELECT * FROM ?? WHERE name LIKE ? ORDER BY ${orderBy} LIMIT ? OFFSET ?`,

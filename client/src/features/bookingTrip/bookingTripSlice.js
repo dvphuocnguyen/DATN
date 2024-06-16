@@ -39,6 +39,8 @@ const bookingTripSlice = createSlice({
       state.isLoading = true;
     },
     getAllSucceed: (state, { payload }) => {
+      // console.log(`payload:::`, payload);
+
       state.isLoading = false;
       state.data = payload.result;
       state.paginations = {

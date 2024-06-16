@@ -39,6 +39,14 @@ const reviewSlice = createSlice({
       toast.error(state.error);
     },
 
+    deleteStart: (state, actions) => {
+      state.isLoading = true;
+    },
+    deleteSucceed: (state) => {
+      toast.success("Xóa đánh giá thành công.");
+      state.isLoading = false;
+    },
+
     // * GET ALL
     getAllStart: (state, actions) => {
       state.isLoading = true;

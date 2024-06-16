@@ -34,7 +34,7 @@ function BookingTrip(props) {
   ];
 
   useEffect(() => {
-    dispatch(bookingTripActions.getAllStart(filters));
+    dispatch(bookingTripActions.getAllStart({...filters, order: "created_at,desc"}));
   }, [filters]);
 
   const handleOpenDialogConfirm = useCallback((bill) => {
@@ -44,14 +44,14 @@ function BookingTrip(props) {
 
   const handleOnPageChange = useCallback(
     (page) => {
-      dispatch(billActions.setFilter({ ...filters, page }));
+      dispatch(bookingTripActions.setFilter({ ...filters, page }));
     },
     [filters]
   );
 
   const handleSearchNameFloor = (value) => {
     dispatch(
-      billActions.setDebounceName({
+      bookingTripActions.setDebounceName({
         ...filters,
         search: value,
         page: 1,

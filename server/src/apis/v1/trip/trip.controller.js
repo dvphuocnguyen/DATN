@@ -100,6 +100,21 @@ class AreaController {
     }
   }
 
+  async deleteReview(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const response = await tripService.deleteReview(id);
+
+      return res.status(200).json({
+        message: "Delete success.",
+        data: response,
+      });
+    } catch (error) {
+      return next(new APIError(error.statusCode || 500, error.message));
+    }
+  }
+
   async getAll(req, res, next) {
     try {
       const filters = req.query;

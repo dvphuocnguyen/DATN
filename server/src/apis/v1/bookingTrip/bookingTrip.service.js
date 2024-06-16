@@ -134,7 +134,7 @@ class BookingTripService extends DBModel {
           orderId: orderId,
           bankCode: "",
           amount: fee.total_price,
-          message: "Thanh toán đặt lịch trình chuyến đi. Mã giao dịch: ",
+          message: "Thanh toan dat lich trinh. Ma giao dich ",
         }),
         this.insert({ table: "bill_details", data: newBookingDetails }),
         this.handleUpdate({
